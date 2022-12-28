@@ -1,0 +1,33 @@
+#! /usr/bin/sh
+# Set proper variables to allow easy "make" building of a NetBSD subtree.
+# Generated from:  $NetBSD: build.sh,v 1.308 2015/06/27 06:00:28 matt Exp $
+# with these arguments: -j 8 -m i386 -O ../obj.i386 -D ../obj.i386/destdir.i386 -V DBG=""-g -O0"" -U -u release
+#
+
+# LSC We are cross compiling, so do not install to root!
+BSHELL=/usr/bin/sh; export BSHELL
+BUILDSEED=MINIX-3.4.0; export BUILDSEED
+CONFIG_SHELL=/usr/bin/sh; export CONFIG_SHELL
+DBG='""-g'; export DBG
+DESTDIR=/home/edguer/Projects/minix-edguer/../obj.i386/destdir.i386; export DESTDIR
+HOST_SH=/usr/bin/sh; export HOST_SH
+LC_ALL=C; export LC_ALL
+MACHINE=i386; export MACHINE
+MACHINE_ARCH=i386; export MACHINE_ARCH
+MAKEFLAGS='-de -m /home/edguer/Projects/minix-edguer/share/mk  MKOBJDIRS=yes'; export MAKEFLAGS
+MAKEOBJDIR='${.CURDIR:C,^/home/edguer/Projects/minix-edguer,/home/edguer/Projects/minix-edguer/0"",}'; export MAKEOBJDIR
+MAKEWRAPPERMACHINE=i386; export MAKEWRAPPERMACHINE
+MKARZERO=yes; export MKARZERO
+MKINSTALLBOOT=no; export MKINSTALLBOOT
+MKUNPRIVED=yes; export MKUNPRIVED
+MKUPDATE=yes; export MKUPDATE
+NETBSDSRCDIR=/home/edguer/Projects/minix-edguer; export NETBSDSRCDIR
+RELEASEDIR=/home/edguer/Projects/minix-edguer/releasedir; export RELEASEDIR
+TOOLDIR='/home/edguer/Projects/minix-edguer/tooldir.Linux-5.15.0-56-generic-x86_64'; export TOOLDIR
+USETOOLS=yes; export USETOOLS
+unset INFODIR
+unset LESSCHARSET
+unset MAKEOBJDIRPREFIX
+unset TERMINFO
+
+exec "${TOOLDIR}/bin/nbmake" ${1+"$@"}
