@@ -288,6 +288,7 @@ print_banner(void)
 			"--- Welcome to MINIX 3. This is the boot monitor. ---\n"
 			"Memory: %d/%d k\n",
 			getbasemem(), getextmem());
+		printf("\n ---- Version modified by edguer.\n");
 #endif /* !defined(__minix) */
 
 #ifndef SMALL
