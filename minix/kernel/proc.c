@@ -868,8 +868,6 @@ void unset_notify_pending(struct proc * caller, int src_p)
  *				mini_send				     * 
  *===========================================================================*/
 // Counters are public because they are being used by dmp_kernel.c
-long sched_to_pm_count = 0;
-long pm_to_sched_count = 0;
 int mini_send(
   register struct proc *caller_ptr,	/* who is trying to send a message? */
   endpoint_t dst_e,			/* to whom is message being sent? */

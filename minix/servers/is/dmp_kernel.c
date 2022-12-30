@@ -280,7 +280,6 @@ privileges_dmp(void)
 	          sp = &priv[USER_PRIV_ID];
         }
 
-        // Also printing number of messages sent
         printf("(%02u) %-7.7s %s %s %6d",
               sp->s_id, rp->p_name,
               s_flags_str(sp->s_flags), s_traps_str(sp->s_trap_mask),
@@ -295,6 +294,8 @@ privileges_dmp(void)
         for (i=0; i < NR_SYS_CALLS; i += BITCHUNK_BITS) {
 	        printf(" %08x", sp->s_k_call_mask[i/BITCHUNK_BITS]);
        	}
+
+        // Also printing number of messages sent
 	      printf(" %lu\n", rp->msg_sent_count);
 
   }
