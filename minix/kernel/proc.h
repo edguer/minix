@@ -134,6 +134,7 @@ struct proc {
 #if DEBUG_TRACE
   int p_schedules;
 #endif
+ unsigned long msg_sent_count;
 };
 
 #endif /* __ASSEMBLY__ */

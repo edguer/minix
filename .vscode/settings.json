@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "syslib.h": "c",
+        "ipc.h": "c",
+        "portio.h": "c"
+    }
+}
