@@ -1775,12 +1775,50 @@ void dequeue(struct proc *rp)
 	rp->p_accounting.enter_queue = 0;
   }
 
+  // Calculates CPU time in milliseconds only for user processes
+  if (rp->p_nr >= 0) {
+	short hz = 60;
+	unsigned long ticks = rp->p_user_time + rp->p_sys_time;
+	// Gets seconds
+	unsigned long secs = ticks / hz;
+	// Gets remaning milliseconds
+	unsigned long msecs = (long)((ticks % hz) * 1000ULL / hz);
+	// Store it
+	rp->p_time_msec = (secs * 1000) + msecs;
+	// rp->p_time_msec = 1000;
+  }
+
   /* For ps(1), remember when the process was last dequeued. */
   rp->p_dequeued = get_monotonic();
 
 #if DEBUG_SANITYCHECKS
   assert(runqueues_ok_local());
 #endif
+}
+
+struct proc * pick_less_used_process(void)
+{
+	// Tries to pick a user process, if it is found, enqueue it, it will be picked up later.
+	struct proc *crp, *less_used_rp = NULL;
+	int runnable = 0, not_runnable = 0;
+	for (crp = BEG_USER_ADDR; crp < END_PROC_ADDR; ++crp) {
+		if (isemptyp(crp)) continue;
+
+		if (proc_is_runnable(crp)) ++runnable;
+		else ++not_runnable;
+
+		if (crp && proc_is_runnable(crp) && (!less_used_rp || crp->p_time_msec < less_used_rp->p_time_msec)) {
+			less_used_rp = crp;
+		}
+	}
+
+	// printf("Nothing to run, but found %d runnable and %d not runnable processes\n", runnable, not_runnable);
+	if (less_used_rp) {
+		printf("Found a less used process, name is %s\n", less_used_rp->p_name);
+		// enqueueing here makes it hang - enqueue_head(less_used_rp);
+	}
+
+	return NULL;
 }
 
 /*===========================================================================*
@@ -1813,6 +1851,9 @@ static struct proc * pick_proc(void)
 		get_cpulocal_var(bill_ptr) = rp; /* bill for system time */
 	return rp;
   }
+
+  pick_less_used_process();
+  
   return NULL;
 }
 

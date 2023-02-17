@@ -2,6 +2,8 @@
     "files.associations": {
         "syslib.h": "c",
         "ipc.h": "c",
-        "portio.h": "c"
+        "portio.h": "c",
+        "lib.h": "c",
+        "featuretest.h": "c"
     }
 }

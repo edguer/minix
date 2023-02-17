@@ -320,6 +320,32 @@ static char *p_rts_flags_str(int flags)
 }
 
 /*===========================================================================*
+ *				my_dbg_dmp    				     *
+ *===========================================================================*/
+void my_dbg_dmp(void)
+{
+  register struct proc *rp;
+  static struct proc *oldrp = BEG_PROC_ADDR;
+  int r;
+
+  /* First obtain a fresh copy of the current process table. */
+  if ((r = sys_getproctab(proc)) != OK) {
+      printf("IS: warning: couldn't get copy of process table: %d\n", r);
+      return;
+  }
+
+  printf("\n  nr  name  tot \n");
+
+  PROCLOOP(rp, oldrp)
+    printf("%-8.8s %lu ",
+          rp->p_name,
+          rp->p_time_msec);
+    PRINTRTS(rp);
+    printf("\n");
+  }  
+}
+
+/*===========================================================================*
  *				proctab_dmp    				     *
  *===========================================================================*/
 #if defined(__i386__)
@@ -337,15 +363,15 @@ void proctab_dmp(void)
       return;
   }
 
-  printf("\n-nr-----gen---endpoint-name--- -prior-quant- -user----sys-rtsflags-from/to-\n");
+  printf("\n-nr-----gen---endpoint-name--- -prior-quant- -user----tot-rtsflags-from/to-\n");
 
   PROCLOOP(rp, oldrp)
 	printf(" %5d %10d ", _ENDPOINT_G(rp->p_endpoint), rp->p_endpoint);
-	printf("%-8.8s %5u %5u %6u %6u ",
+	printf("%-8.8s %5u %5u %6u %lu ",
 	       rp->p_name,
 	       rp->p_priority,
 	       rp->p_quantum_size_ms,
-	       rp->p_user_time, rp->p_sys_time);
+	       rp->p_user_time, rp->p_time_msec);
 	PRINTRTS(rp);
 	printf("\n");
   }
