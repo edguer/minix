@@ -137,6 +137,12 @@ void proc_init(void)
 
 		/* arch-specific initialization */
 		arch_proc_reset(rp);
+
+		/* Zeroing message counters */
+		for (int j = 0; j < NR_TASKS + NR_PROCS; j++)
+		{
+			send_msg_counter[i + NR_TASKS][j] = 0;
+		}
 	}
 	for (sp = BEG_PRIV_ADDR, i = 0; sp < END_PRIV_ADDR; ++sp, ++i) {
 		sp->s_proc_nr = NONE;		/* initialize as free */
@@ -156,6 +162,7 @@ void proc_init(void)
 		ip->p_rts_flags |= RTS_PROC_STOP;
 		set_idle_name(ip->p_name, i);
 	}
+	
 }
 
 static void switch_address_space_idle(void)
@@ -884,6 +891,9 @@ int mini_send(
   int dst_p;
   dst_p = _ENDPOINT_P(dst_e);
   dst_ptr = proc_addr(dst_p);
+
+  // Increase message counters matrix
+  ++send_msg_counter[proc_index(caller_ptr)][proc_index(dst_ptr)];
 
   if (RTS_ISSET(dst_ptr, RTS_NO_ENDPOINT))
   {

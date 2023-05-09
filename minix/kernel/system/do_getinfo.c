@@ -200,6 +200,19 @@ int do_getinfo(struct proc * caller, message * m_ptr)
 	src_vir = (vir_bytes)ticks;
 	break;
     }
+    case GET_PROC_MSG_COUNT: {
+        printf("%s: ", proc[VFS_PROC_NR + NR_TASKS].p_name);
+        for (unsigned long i = 0; i < NR_TASKS + NR_PROCS; i++)
+        {
+            struct proc rp = proc[i];
+            if (isemptyp(&rp) || !send_msg_counter[VFS_PROC_NR + NR_TASKS][i]) continue; 
+            printf("%s(%lu) ", rp.p_name, send_msg_counter[VFS_PROC_NR + NR_TASKS][i]);
+        }
+        
+        length = sizeof(unsigned long) * ((NR_PROCS + NR_TASKS) ^ 2);
+        src_vir = (vir_bytes) send_msg_counter;
+        break;
+    }
     default:
 	printf("do_getinfo: invalid request %d\n",
 		m_ptr->m_lsys_krn_sys_getinfo.request);
@@ -213,6 +226,11 @@ int do_getinfo(struct proc * caller, message * m_ptr)
 
   r = data_copy_vmcheck(caller, KERNEL, src_vir, caller->p_endpoint,
 	m_ptr->m_lsys_krn_sys_getinfo.val_ptr, length);
+
+  if (m_ptr->m_lsys_krn_sys_getinfo.request == GET_PROC_MSG_COUNT)
+  {
+    printf("\nGET_PROC_MSG_COUNT result is %d, dest address is %lu\n", r, m_ptr->m_lsys_krn_sys_getinfo.val_ptr);
+  }
 
   if(r != OK) return r;
 

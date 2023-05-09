@@ -55,6 +55,7 @@ static char *p_rts_flags_str(int flags);
 struct proc proc[NR_TASKS + NR_PROCS];
 struct priv priv[NR_SYS_PROCS];
 struct boot_image image[NR_BOOT_PROCS];
+unsigned long send_msg_counter[NR_TASKS + NR_PROCS][NR_TASKS + NR_PROCS];
 
 /*===========================================================================*
  *				kmessages_dmp				     *
@@ -319,10 +320,7 @@ static char *p_rts_flags_str(int flags)
 	return str;
 }
 
-/*===========================================================================*
- *				my_dbg_dmp    				     *
- *===========================================================================*/
-void my_dbg_dmp(void)
+void proc_time()
 {
   register struct proc *rp;
   static struct proc *oldrp = BEG_PROC_ADDR;
@@ -342,17 +340,64 @@ void my_dbg_dmp(void)
           rp->p_time_msec);
     PRINTRTS(rp);
     printf("\n");
-  }  
+  }
+}
+
+/*===========================================================================*
+ *				My auxiliary functions    				     *
+ *===========================================================================*/
+void proc_msg_count()
+{
+  printf("Process messages sent count:\n");
+  printf("\nFrom  - To\n");
+  int r;
+  register struct proc *rp;
+
+  if ((r = sys_getprocmsgcount(send_msg_counter)) != OK) {
+      printf("IS: warning: couldn't get copy of message sent counters table: %d\n", r);
+      return;
+  }
+
+  short int any_count = 0;
+  for (int source_index = 0; source_index < NR_TASKS + NR_PROCS; source_index++)
+  {
+    short int any_source_msg = 0;
+    for (int dest_index = 0; dest_index < NR_TASKS + NR_PROCS; dest_index++)
+    {
+      unsigned long count = send_msg_counter[source_index][dest_index];
+      
+      if (count == 0) continue;
+      if (!any_source_msg)
+      {
+        any_count = any_source_msg = 1;
+        printf("%4d -> ", dest_index - NR_TASKS);
+      }
+
+      printf("%4d(%5lu) ", dest_index - NR_TASKS, count);
+    }
+
+    if (any_source_msg) printf("\n");
+  }
+
+  if (!any_count) printf("Message counter table is empty. Dest is %lu\n", (vir_bytes)&send_msg_counter);
+}
+
+/*===========================================================================*
+ *				my_dbg_dmp    				     *
+ *===========================================================================*/
+void my_dbg_dmp(void)
+{
+  printf("\nMY DEBUG INFO:\n");
+  // proc_time();
+  proc_msg_count();
 }
 
 /*===========================================================================*
  *				proctab_dmp    				     *
  *===========================================================================*/
-#if defined(__i386__)
 void proctab_dmp(void)
 {
-/* Proc table dump */
-
+  /* Proc table dump */
   register struct proc *rp;
   static struct proc *oldrp = BEG_PROC_ADDR;
   int r;
@@ -376,14 +421,7 @@ void proctab_dmp(void)
 	printf("\n");
   }
 }
-#endif				/* defined(__i386__) */
 
-#if defined(__arm__)
-void proctab_dmp(void)
-{
-    /* LSC FIXME: Not implemented for arm */
-}
-#endif				/* defined(__arm__) */
 
 /*===========================================================================*
  *				procstack_dmp  				     *

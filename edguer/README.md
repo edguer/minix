@@ -51,16 +51,37 @@ Setting up a new system call is simple, but requires a few steps and changes in 
 ![image](syscall.png)
 
 1. We must change the user library (libc) to add the function
-2. The libc function calls `_syscall` function (providing the system call number), which essentially sends the message to the IPC server with `sendrec`, do we wait a reply
+2. The libc function calls `_syscall` function (providing the system call number), which essentially sends the message to the IPC server with `sendrec`
 3. The IPC server dispatches the message to the PM server
 4. The PM server reads the message number and call the appropriate function, in this case it is do_setnice.
 
 Let's drill down on the changes...
 
-1. The first thing we had to do was to add our function prototype to the libc header file: [unistd.h](include/unistd.h#112)
-2. Then, we had to add a system call number at [callnr.h](minix/include/minix/callnr.h#40), notice that because we are adding one more syscall to the PM, the `NR_PM_CALLS` definition was increased by one
-3. To be able to communicate with the PM, we must add our data parameters to the message. For that, we had to add a additional struct field called `m_lc_pm_setnice` containing our parameters to the `message` struct at [ipc.h](minix/include/minix/ipc.h#2411) header. Of course we had to create a struct for our case, located at that same file at [line 532](minix/include/minix/ipc.h#532).
-4. With all that setup, we were good to create the implementation. First one was the libc function implementation, and for that we opted to create a new source file called [setnice.c](minix/lib/libc/sys/setnice.c). We simply create the message and fill our parameters, then send it using `_syscall`, passing the PM process number and our system call number as arguments. Notice the source file must me added to the [Makefile.inc](minix/lib/libc/sys/Makefile.inc)
-5. Next step is to create the prototype for the `do_setnice` function for the PM, and this was done inside the [proto.h](minix/servers/pm/proto.h#26) file
-6. We also need to associate our system call number to the `do_setnice` function at [table.c](minix/servers/pm/table.c#62)
-7. Now we can write the `do_setnice` implementation at the PM. We did that at the [setnice.c](minix/servers/pm/setnice.c) file. In summary, we look for that process, check if it is really child of the calling process and then just use the `sched_nice` function to change the priority and update the process entry with the new value at the PM processes' list
+1. The first thing we had to do was to add our function prototype to the libc header file: [unistd.h](../include/unistd.h#112)
+2. Then, we had to add a system call number at [callnr.h](../minix/include/minix/callnr.h#40), notice that because we are adding one more syscall to the PM, the `NR_PM_CALLS` definition was increased by one
+3. To be able to communicate with the PM, we must add our data parameters to the message. For that, we had to add a additional struct field called `m_lc_pm_setnice` containing our parameters to the `message` struct at [ipc.h](../minix/include/minix/ipc.h#2411) header. Of course we had to create a struct for our case, located at that same file at [line 532](../minix/include/minix/ipc.h#532).
+4. With all that setup, we were good to create the implementation. First one was the libc function implementation, and for that we opted to create a new source file called [setnice.c](../minix/lib/libc/sys/setnice.c). We simply create the message and fill our parameters, then send it using `_syscall`, passing the PM process number and our system call number as arguments. Notice the source file must me added to the [Makefile.inc](../minix/lib/libc/sys/Makefile.inc)
+5. Next step is to create the prototype for the `do_setnice` function for the PM, and this was done inside the [proto.h](../minix/servers/pm/proto.h#26) file
+6. We also need to associate our system call number to the `do_setnice` function at [table.c](../minix/servers/pm/table.c#62)
+7. Now we can write the `do_setnice` implementation at the PM. We did that at the [setnice.c](../minix/servers/pm/setnice.c) file. In summary, we look for that process, check if it is really child of the calling process and then just use the `sched_nice` function to change the priority and update the process entry with the new value at the PM processes' list
+
+#### *47. Modify the hwint_master and hwint_slave macros in mpx386.s so the operations now performed by the save function are performed inline. What is the cost in code size? Can you measure an increase in performance?*
+
+This exercise is hard to complete, since the aformentioned "save" assembly function was converted to a C macro in latest Minix version, meaning it is now inline. Performance is probably better, based on information brought by the book - it increases the assembly size, but it gets much better in performance because there is less pressure in the stack, since there is one less function call, or one less stack frame. So `pushad`, for example, is spared (pushing all registers to the stack), and going back to the parent function address is also spared. Measurements at this low level is very hard, since we don't have printf at hand, at least, and any custom logging would have a huge impact on the interrupt serving routine performance, so much noise that would hide the actual performance measurement.
+
+#### *50. Modify MINIX 3 to collect statistics about messages sent by whom to whom and write a program to collect and print these statistics in a useful way.*
+
+The easiest place to get source and destination process is in [`mini_send` function](../minix/kernel/proc.c#871), it is a kernel-level function, but contains the `caller_ptr` and the `dst_ptr` pointers, so we can log them here.
+
+This is in kernel space though, so we will need a way to transmit that data to the user-space. For that though we would need to go deep into the kernel, here is how it works: whenever we need kernel information, we need to call the `sys_getinfo` function, which calls the `_kernel_call` that, in the end, calls the `_do_kernel_call_intr` assembly routine, That routine simply pushes the message address to EAX and call the kernel software interrupt. At some point during interrupt handling, the `kernel_call` will get called and route the to the appropriate handler through the `call_vec`, which will take us to the `do_getinfo` handler at [do_getinfo.c](../minix/kernel/system/do_getinfo.c#74). So after adding having our data collected, we need to implement a new GETINFO type.
+
+
+**Implementation**
+
+Made a simplistic implementation with a matrix. It will consume 4MB in memory, and there is no cleanup logic when a process is finished, it is very dumb. First, we defined the `send_msg_counter` matrix at [proc.h](../minix/kernel/proc.h#294) and added the `proc_index` macro to make it easier to find a process address based on the process struct at [proc.h](../minix/kernel/proc.h#274). Next, we are zeroing the matrix at startup at [proc.c](../minix/kernel/proc.c#142) and increase the counter in `mini_send` method at [proc.c](../minix/kernel/proc.c#896).
+
+Then comes the hardest part: making a way to copy the kernel level data to Information Server process. This is done by using the `sys_getinfo`, so we first we created our own macro at [syslib.h](../minix/include/minix/syslib.h#193), and its SYS_GETINFO number at [com.h](../minix/include/minix/com.h#340). To handle the request, we did changes at [do_getinfo.c](../minix/kernel/system/do_getinfo.c#203).
+
+To call and the kernel info, we created our own matrix at the IS at [dmp_kernel.c](../minix/servers/is/dmp_kernel.c#58) and made changes to our dump function at [dmp_kernel.c](../minix/servers/is/dmp_kernel.c#379). Unfortunately, the information retrieved from the kernel is always empty, and zeroed, although the result is always OK. We can see the table is being filled by looking at the kernel level printf, but the data is not being copied over to the IS process.
+
+Another approach would be adding a list inside each process's entry, so we would take advantage of all the data copy already in-place.

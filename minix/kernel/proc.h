@@ -271,6 +271,7 @@ struct proc {
 
 #define proc_addr(n)      (&(proc[NR_TASKS + (n)]))
 #define proc_nr(p) 	  ((p)->p_nr)
+#define proc_index(p)      (NR_TASKS + proc_nr(p))
 
 #define isokprocn(n)      ((unsigned) ((n) + NR_TASKS) < NR_PROCS + NR_TASKS)
 #define isemptyn(n)       isemptyp(proc_addr(n)) 
@@ -284,6 +285,13 @@ struct proc {
 #ifndef __ASSEMBLY__
 
 EXTERN struct proc proc[NR_TASKS + NR_PROCS];	/* process table */
+
+/*
+ * Matrix storing sent messaged from process to process.
+ * Example, if process 1 sends a message to process 2: ++send_msg_counter[1][2]
+ * and get send_msg_counter[1][2] will retrieve the number of messages send from 1 to 2.
+ */
+EXTERN unsigned long send_msg_counter[NR_TASKS + NR_PROCS][NR_TASKS + NR_PROCS];
 
 int mini_send(struct proc *caller_ptr, endpoint_t dst_e, message *m_ptr,
 	int flags);
