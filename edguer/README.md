@@ -85,3 +85,17 @@ Then comes the hardest part: making a way to copy the kernel level data to Infor
 To call and the kernel info, we created our own matrix at the IS at [dmp_kernel.c](../minix/servers/is/dmp_kernel.c#58) and made changes to our dump function at [dmp_kernel.c](../minix/servers/is/dmp_kernel.c#379). Unfortunately, the information retrieved from the kernel is always empty, and zeroed, although the result is always OK. We can see the table is being filled by looking at the kernel level printf, but the data is not being copied over to the IS process.
 
 Another approach would be adding a list inside each process's entry, so we would take advantage of all the data copy already in-place.
+
+### Chapter 3 - Input and Output
+
+#### *40. Write a graphics driver for the IBM color display, or some other suitable bitmap display. The driver should accept commands to set and clear individual pixels, move rectangles around the screen, and any other features you think are interesting. User programs interface to the driver by opening /dev/graphics and writing commands to it.*
+
+#### *41. Modify the MINIX floppy disk driver to do track-at-a-time caching.*
+
+#### *42. Implement a floppy disk driver that works as a character, rather than a block device, to bypass the file system’s block cache. In this way, users can read large chunks of data from the disk, which are DMA’ed irectly to user space, greatly improving performance. This driver would primarily be of interest to programs that need to read the raw bits on the disk, without regard to the file system. File system checkers fall into this category.*
+
+#### *43. Implement the UNIX PROFIL system call, which is missing from MINIX .*
+
+#### *44. Modify the terminal driver so that in addition to a having a special key to erase the previous character, there is a key to erase the previous word.*
+
+#### *45. A new hard disk device with removable media has been added to a MINIX 3 system. This device must spin up to speed every time the media are changed, and the spin up time is quite long. It is anticipated media changes will be made frequently while the system is running. Suddenly the waitfor routine in at  wini.c is unsatisfactory. Design a new waitfor routine in which, if the bit pattern being awaited is not found after 1 second of busy waiting, a phase will be entered in which the disk driver will sleep for 1 second, test the port, and go back to sleep for another second until either the sought for pattern is found or the preset TIMEOUT period expires.*
