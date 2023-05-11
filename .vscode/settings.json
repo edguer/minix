@@ -1,13 +1,5 @@
 {
     "files.associations": {
-        "syslib.h": "c",
-        "ipc.h": "c",
-        "portio.h": "c",
-        "lib.h": "c",
-        "featuretest.h": "c",
-        "system_error": "c",
-        "resource.h": "c",
-        "u64.h": "c",
-        "system.h": "c"
+        "stdio.h": "c"
     }
 }

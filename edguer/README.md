@@ -88,6 +88,8 @@ Another approach would be adding a list inside each process's entry, so we would
 
 ### Chapter 3 - Input and Output
 
+Before anything elase, we must learn how to write a driver to Minix 3, so I followed this walkthrough: https://wiki.minix3.org/doku.php?id=developersguide:driverprogramming
+
 #### *40. Write a graphics driver for the IBM color display, or some other suitable bitmap display. The driver should accept commands to set and clear individual pixels, move rectangles around the screen, and any other features you think are interesting. User programs interface to the driver by opening /dev/graphics and writing commands to it.*
 
 #### *41. Modify the MINIX floppy disk driver to do track-at-a-time caching.*
@@ -98,4 +100,4 @@ Another approach would be adding a list inside each process's entry, so we would
 
 #### *44. Modify the terminal driver so that in addition to a having a special key to erase the previous character, there is a key to erase the previous word.*
 
-#### *45. A new hard disk device with removable media has been added to a MINIX 3 system. This device must spin up to speed every time the media are changed, and the spin up time is quite long. It is anticipated media changes will be made frequently while the system is running. Suddenly the waitfor routine in at  wini.c is unsatisfactory. Design a new waitfor routine in which, if the bit pattern being awaited is not found after 1 second of busy waiting, a phase will be entered in which the disk driver will sleep for 1 second, test the port, and go back to sleep for another second until either the sought for pattern is found or the preset TIMEOUT period expires.*
+#### *45. A new hard disk device with removable media has been added to a MINIX 3 system. This device must spin up to speed every time the media are changed, and the spin up time is quite long. It is anticipated media changes will be made frequently while the system is running. Suddenly the waitfor routine in at wini.c is unsatisfactory. Design a new waitfor routine in which, if the bit pattern being awaited is not found after 1 second of busy waiting, a phase will be entered in which the disk driver will sleep for 1 second, test the port, and go back to sleep for another second until either the sought for pattern is found or the preset TIMEOUT period expires.*
