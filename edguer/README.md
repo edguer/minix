@@ -90,6 +90,8 @@ Another approach would be adding a list inside each process's entry, so we would
 
 Before anything elase, we must learn how to write a driver to Minix 3, so I followed this walkthrough: https://wiki.minix3.org/doku.php?id=developersguide:driverprogramming
 
+They can be found under minix/drivers/hello (the simplest), minix/drivers/hello-dev (character device with SEF API) and minix/drivers/rtc (to get RTC/CMOS date time, also character device).
+
 #### *40. Write a graphics driver for the IBM color display, or some other suitable bitmap display. The driver should accept commands to set and clear individual pixels, move rectangles around the screen, and any other features you think are interesting. User programs interface to the driver by opening /dev/graphics and writing commands to it.*
 
 #### *41. Modify the MINIX floppy disk driver to do track-at-a-time caching.*
