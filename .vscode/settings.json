@@ -1,6 +1,35 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "*.def": "c"
+        "*.def": "c",
+        "__std_stream": "c",
+        "cstdio": "c",
+        "fstream": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "__tree": "c",
+        "array": "c",
+        "bitset": "c",
+        "deque": "c",
+        "dynarray": "c",
+        "hash_map": "c",
+        "hash_set": "c",
+        "initializer_list": "c",
+        "list": "c",
+        "map": "c",
+        "memory": "c",
+        "queue": "c",
+        "random": "c",
+        "regex": "c",
+        "set": "c",
+        "stack": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "unordered_set": "c",
+        "utility": "c",
+        "valarray": "c",
+        "vector": "c",
+        "*.ipp": "c",
+        "string_view": "c"
     }
 }

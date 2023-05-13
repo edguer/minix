@@ -94,6 +94,20 @@ They can be found under minix/drivers/hello (the simplest), minix/drivers/hello-
 
 #### *40. Write a graphics driver for the IBM color display, or some other suitable bitmap display. The driver should accept commands to set and clear individual pixels, move rectangles around the screen, and any other features you think are interesting. User programs interface to the driver by opening /dev/graphics and writing commands to it.*
 
+Writing this would be a big challenge, so I'm planning to write 2 versions of it:
+1. A simple character driver that reads from a virtual char device and sets the bios video memory accordingly - it should strait forward, except we need to understand how to get access to the video memory (it can probably be done through the conf file).
+2. Write the actual driver for the color display, for that we would need to define what hardware we should use (is it a generic VGA interface?) gather hardware manuals, emulate the hardware in Virtual Box and implement.
+
+*UPDATE:* turned out, the IBM color simply translates to the colored character video memory block (the one that carries 2 bytes per character, one for the char itself, and other for the color), so we just need to write a driver that sets that memory location.
+
+To make that happen, we created a driver called "vid" - regular process, pretty much a copy from other devices in terms of structure etc. By digging into other drivers and other parts of Minix, I figured that for us to get access to the video memory location, we need to create an "mmap", or memory map. Kernel gives as a way of doing it with the `vm_map_phys` call, in which you pass the memory address you and size you need to make the map. Then, you get a pointer to that memory location and you can freely manipulate it. Problem is, before that, you have to actually request the privilege for that memory address by calling `sys_privctl`, which requires a `minix_mem_range`. So, after calling `sys_privctl` and `vm_map_phys` you will get hold of that magic pointer.
+
+Today we are just receiving some chars from the device, and then print them on the screen on the first character of each row, so we can actually see the effect in the screen, since we are writing to it at the same time as the console driver, so our changes get overwriting every time. For example: by the time we write to the driver, Minix logs the kernel logs into the screen, overwriting our changes to the video memory.
+
+The memory mapping part can be found [here](../minix/drivers/vid/vid.c#115), and the writing part [here](../minix/drivers/vid/vid.c#164).
+
+Next steps: flush the screen before writing (memset would do) so we can see the data better.
+
 #### *41. Modify the MINIX floppy disk driver to do track-at-a-time caching.*
 
 #### *42. Implement a floppy disk driver that works as a character, rather than a block device, to bypass the file system’s block cache. In this way, users can read large chunks of data from the disk, which are DMA’ed irectly to user space, greatly improving performance. This driver would primarily be of interest to programs that need to read the raw bits on the disk, without regard to the file system. File system checkers fall into this category.*
