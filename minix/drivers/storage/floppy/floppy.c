@@ -588,6 +588,19 @@ static ssize_t f_transfer(
 	if (fp->fl_sector == NO_SECTOR && count < (6 * SECTOR_SIZE))
 		fp->fl_sector = 0;
 
+	// TODO: find the first and last track. Say: first sector track is 1, last sector track is 2.
+	// TODO: we will read all tracks, from tip to toe, so we need to figure out first and last sectors
+	// TODO: we will issue a read for all those sector: today we read sector by sector, limited by the number of bytes to read
+	// 		 so we will need to make a different for, based off the tip and toe sectors, and pushed them the cache. No need for ugrants
+	//		 since we will use the driver's memory address, we will just push each sector to floppy_buf and them copy the buffer to the cache
+	//		 we keep doing this until reading the last sector.
+	// TODO: we will cache all of them blindly for now, cache per track/sector, per floppy
+	// TODO: out of all of those, we will identify which are actually requested by the user, and copy them to the user space
+	//       process will be similar to this loop, we will iterate uoffsets and ugrants but use the cache, copying data to the user base on those values
+	// TODO: start using the cache, so if a track is cached, return the bytes right-away. Should be simple: is track cached? If so, skip the reading part 
+	// TODO: if a write is made on the track, invalidate the cache
+	// TODO: if device is close, cache should be reset
+
 	for (nbytes = 0; nbytes < count; nbytes += SECTOR_SIZE) {
 		if (fp->fl_sector == NO_SECTOR) {
 			/* Find out what the current sector is.  This often

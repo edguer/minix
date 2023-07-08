@@ -106,9 +106,9 @@ Today we are just receiving some chars from the device, and then print them on t
 
 The memory mapping part can be found [here](../minix/drivers/vid/vid.c#115), and the writing part [here](../minix/drivers/vid/vid.c#164).
 
-Next steps: flush the screen before writing (memset would do) so we can see the data better.
-
 #### *41. Modify the MINIX floppy disk driver to do track-at-a-time caching.*
+
+It will be a long-running and complex task... The list of steps can be found here: [floppy.c](../minix/drivers/storage/floppy/floppy.c#591)
 
 #### *42. Implement a floppy disk driver that works as a character, rather than a block device, to bypass the file system’s block cache. In this way, users can read large chunks of data from the disk, which are DMA’ed irectly to user space, greatly improving performance. This driver would primarily be of interest to programs that need to read the raw bits on the disk, without regard to the file system. File system checkers fall into this category.*
 

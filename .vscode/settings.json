@@ -30,6 +30,9 @@
         "valarray": "c",
         "vector": "c",
         "*.ipp": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "algorithm": "c",
+        "*.inc": "c",
+        "blockdriver.h": "c"
     }
 }

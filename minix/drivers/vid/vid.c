@@ -163,9 +163,15 @@ ssize_t vid_read(devminor_t minor, u64_t position, endpoint_t endpt, cp_grant_id
 
 ssize_t vid_write(devminor_t minor, u64_t position, endpoint_t endpt, cp_grant_id_t grant, size_t size, int flags, cdev_id_t id)
 {
-    char buffer[128];
+    char buffer[1024];
     char *buf_ptr = buffer;
     int r;
+
+    if (size > 1024)
+    {
+        printf("vid_write input size is %d, buffer limit is 1024, skipping\n", r);
+        return -1;
+    }
 
     // It fails today, but data is being copied to buffer
     if ((r = sys_safecopyfrom(endpt, grant, position, (vir_bytes)buf_ptr, size)) != OK)
@@ -173,10 +179,15 @@ ssize_t vid_write(devminor_t minor, u64_t position, endpoint_t endpt, cp_grant_i
 
     printf("vid_write received data: %s\n", buffer);
 
-    // We are writing each character to the start position of each line, so we can see the results in the screen
+    // Setting a random value so we set a random font and background color, so we can see something
+    memset(vid_mem, 45, vid_size);
+
+    printf("vid_write bios_columns: %hu\n", bios_columns);
+
     for (int i = 0; i < size; i++)
     {
-        *(vid_mem + (bios_columns * i)) = *buf_ptr++;
+        // We will start writing to the third row, so we can read after the console returns (minix will scroll down the screen at least one row after we execute this)
+        *(vid_mem + (bios_columns * 3) + (i * 2)) = *buf_ptr++;
     }
 
     return 0;
